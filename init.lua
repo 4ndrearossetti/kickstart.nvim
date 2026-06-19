@@ -720,8 +720,11 @@ require('lazy').setup({
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Mason-tool-installer handles installs)
         automatic_installation = false,
-        automatic_enable = true,
+        automatic_enable = false, -- we enable servers explicitly below to avoid starting non-LSP tools (e.g. stylua)
       }
+
+      -- Explicitly enable only the LSP servers we configured.
+      vim.lsp.enable(vim.tbl_keys(servers))
     end,
   },
 
