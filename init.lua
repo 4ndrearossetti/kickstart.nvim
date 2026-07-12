@@ -886,16 +886,37 @@ require('lazy').setup({
 
   {
     'metalelf0/black-metal-theme-neovim',
-    lazy = false, -- Load early to ensure colorscheme is available
-    priority = 1000, -- High priority for colorschemes
+    lazy = false,
+    priority = 1000,
     config = function()
       require('black-metal').setup {
-        theme = 'taake', -- Set Taake as the default theme
-        variant = 'dark', -- Use the dark variant (default)
-        alt_bg = false, -- Set to true for marduk-alt (lighter background)
-        transparent = true, -- For transparent background (like tokyonight)
+        theme = 'taake',
+        variant = 'dark',
+        alt_bg = false,
+        transparent = true, -- keep this; harmless and correct
       }
-      -- Load the colorscheme after setup
+
+      -- Force transparency on every colorscheme load, so it can't be undone
+      -- by plugin load order or a theme update. Registered BEFORE the
+      -- colorscheme call below so it also fires on this first load.
+      vim.api.nvim_create_autocmd('ColorScheme', {
+        callback = function()
+          for _, g in ipairs {
+            'Normal',
+            'NormalNC',
+            'NormalFloat',
+            'FloatBorder',
+            'SignColumn',
+            'LineNr',
+            'EndOfBuffer',
+            'TelescopeNormal',
+            'TelescopeBorder',
+          } do
+            vim.api.nvim_set_hl(0, g, { bg = 'none' })
+          end
+        end,
+      })
+
       vim.cmd.colorscheme 'taake'
     end,
   },
@@ -1001,7 +1022,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
